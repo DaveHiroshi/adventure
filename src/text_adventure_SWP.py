@@ -3,11 +3,30 @@ import os
 os.system('cls')
 print('Willkommen,')
 
+
+trennlinie="------------------------------"
 ################################################################
 # Liste des Inventars
 ################################################################
-inventar = ['Phaser','Sonde','Sonde', 'Sonde']
+inventar = []
 
+umgebung = [
+                [],
+                [],
+                ['[1] Asteroid abbauen', '[2] Schiffswrack'],
+                ['[1] Phaser', '[2] Phaser', '[3] Sonde', '[4] Reperatur Kit'],
+                [],
+                [],
+                [],
+                ['[1] Gold', '[2] Diamant'],
+                [],
+                [],
+                [],
+                [],
+                []
+
+
+            ]
 
 ################################################################
 # Die story Liste beinhaltet als Elemente die Kapitel der Geschichte
@@ -25,7 +44,8 @@ story = [
             "Das Team hat sich für den rechten Weg entschieden. Je tiefer sie hinabsteigen, desto heißer wird es. Sie sind erschöpft und am Ende ihrer Kräfte. Plötzlich werden sie von unbekannten Wesen angegriffen.",
             "Nach dem längeren Schussaustausch, bemerkt einer der Soldaten, dass die Höhle einzustürzen droht.",
             "Nach langer Suche findet das Außenteam schließlich die verlorenen Wissenschaftler. Sie wissen nicht, dass sie auf der Erde als verschollen gelten und weigern sich ihre Arbeit zu beenden. Das Team muss sie zur Aufgabe ihrer Arbeit überreden. Nach einigen Diskussionen erklären sie sich bereit, ihre Instrumente einzupacken und begeben sich mit Hilfe des Außenteams zurück zur Oberfläche. Dort angekommen kontaktieren sie das Schiff und lassen sich hochbeamen. Die Mission ist ein voller Erfolg.  Zuhause auf der Erde wird die Besatzung des Schiffes für ihre Heldentaten gefeiert und erhalten die „Christopher Pike Heldenmedaille“. Du als Captain freust dich aber auf die nächsten Abenteuer mit deinem Schiff und deiner Crew.  Well done, Commander!",
-            "Du bist tot."
+            "Game Over"
+            
         ]
 
 ################################################################
@@ -36,26 +56,53 @@ story = [
 ################################################################
 fragen = [ 
             [
-                [
-                    "Du bleibst stehen und wartest bis die gegnerischen Schiffe in Feuerreichweite sind.",
-                    "1"
-                ],
-                [
-                    "Du versuchst zu fliehen.",
-                    "2"
-                ]
+                ["Du bleibst stehen und wartest bis die gegnerischen Schiffe in Feuerreichweite sind.","1"],
+                ["Du versuchst zu fliehen.","2"]
             ],
-            [["Du leitest die ganze Energie zu den Waffen", "3"], ["Du leitest die ganze Energie zu den Schilden", "12"]],
-            [["Du schickst einen Notruf ab.", "3"], ["Du entscheidest dich, den Hyperraumantrieb auszuschalten", "12"]], 
-            [["Du zerstörst das Schiff und bittest die Vulkanier um Hilfe.", "4"], ["Du beamst mit einem Team auf das andere Schiff und versuchst Informationen zu sammeln.", "12"]],
-            [["Du drückst den roten Knopf", "5"], ["Du drückst den grünen Knopf", "12"]],
-            [["Du entscheidest dich, eines deiner Reparierkits aufzubrauchen", "6"], ["Du behältst die Reparierkits für einen möglichen späteren Notfall auf", "12"]],
-            [["Du stellst mehrere Teams zusammen und beamst die Teams auf den Planeten.", "7"], ["Du sendest drei Sonden runter auf die Oberfläche des Planeten ", "8"]],
-            [["Du wählst den rechten Weg.", "9"], ["Du wählst den linken Weg.", "12"]],
-            [["Schick eine weitere Sonde ", "8"], ["Stelle 3 bewaffnete Rettungsteams zusammen und beam sie auf die Oberfläche. ", "7"]],
-            [[" Sie versuchen zu entkommen ", "11"], ["Sie schießen zurück", "10"]],
-            [["Sie Projizieren Hologramme von sich selbst und lenken dadurch die Gegner ab. Sie können jetzt ihren Weg fortsetzen. ", "11"], ["Sie bleiben und feuern weiter auf ihre Gegner. ", "12"]],
-            [["Deine Reise findet ein plötzliches Ende. Du bekommst einen Ehrenplatz in den Reihen der gefallenen Helden der Sternenflotte."], []]                        
+            [
+                ["Du leitest die ganze Energie zu den Waffen", "3"], 
+                ["Du leitest die ganze Energie zu den Schilden", "12"]
+            ],
+            [
+                ["Du schickst einen Notruf ab.", "3"], 
+                ["Du entscheidest dich, den Hyperraumantrieb auszuschalten", "12"]
+            ], 
+            [
+                ["Du zerstörst das Schiff und bittest die Vulkanier um Hilfe.", "4"], 
+                ["Du beamst mit einem Team auf das andere Schiff und versuchst Informationen zu sammeln.", "12"]
+            ],
+            [
+                ["Du drückst den roten Knopf", "5"], 
+                ["Du drückst den grünen Knopf", "12"]
+            ],
+            [
+                ["Du entscheidest dich, eines deiner Reparierkits aufzubrauchen", "6"], 
+                ["Du behältst die Reparierkits für einen möglichen späteren Notfall auf", "12"]
+            ],
+            [
+                ["Du stellst mehrere Teams zusammen und beamst die Teams auf den Planeten.", "7"], 
+                ["Du sendest drei Sonden runter auf die Oberfläche des Planeten ", "8"]
+            ],
+            [
+                ["Du wählst den rechten Weg.", "9"], 
+                ["Du wählst den linken Weg.", "12"]
+            ],
+            [
+                ["Schick eine weitere Sonde ", "8"], 
+                ["Stelle 3 bewaffnete Rettungsteams zusammen und beam sie auf die Oberfläche. ", "7"]
+            ],
+            [
+                [" Sie versuchen zu entkommen ", "11"], 
+                ["Sie schießen zurück", "10"]
+            ],
+            [
+                ["Sie Projizieren Hologramme von sich selbst und lenken dadurch die Gegner ab. Sie können jetzt ihren Weg fortsetzen. ", "11"], 
+                ["Sie bleiben und feuern weiter auf ihre Gegner. ", "12"]
+            ],
+            [
+                ["Deine Reise findet ein plötzliches Ende. Du bekommst einen Ehrenplatz in den Reihen der gefallenen Helden der Sternenflotte.","12"],
+                ["dummy","12"]
+            ]                        
         ]
 ################################################################
 # Hilfsfunktion zur Darstellung von Story Kapitel
@@ -74,20 +121,31 @@ def print_story(k):
 # parst die Antwort des Benutzers
 ################################################################
 def print_fragen(k):
+    if(k==len(fragen)):
+        return
+        
     print("Wähle die gewünschte Antwort aus!")
+
     for j in range(len(fragen[k])):
         print("[" + str(j+1) + "] "+ fragen[k][j][0])
     
     print('[i] Inventar')
+    print('[u] Umgebung Scannen')
 
     eingabe = ""
     while(eingabe not in ["1","2","i"]):
         eingabe = input()
 
         if eingabe == ('i'):
+            print('inventar:')
             print(inventar)
-
-
+            print(trennlinie)
+            print_fragen(k)
+        elif eingabe == ('u'):
+            print('Umgebung:')
+            print_umgebung(k)
+            print(trennlinie)
+            print_fragen(k)
         elif eingabe in ["1","2"]:
             break
         else:
@@ -103,15 +161,15 @@ def print_fragen(k):
         next_step=int(fragen[k][j][1])
         kapitel(next_step)
 
+def print_umgebung(k):
+    print(umgebung[k])
 
 ################################################################
 # Printe Kapitel 0
 #
 ################################################################
 def kapitel(k):
-    # print('Du bist der Captain auf einem Sternenschiff tausende Lichtjahre von der ErdeDein Offizier teilt dir mit, dass 2 feindliche Schiffe auf dem Radar aufgetaucht sind.  entfernt., ')
-    # print('Dein Offizier teilt dir mit, dass 2 feindliche Schiffe auf dem Radar aufgetaucht sind.')
-    # print('Zwei Schiffe greifen dich an. Was willst du machen?')
+    # print(f">>>>>>> kapitel called with k={k}")
     print_story(k)
     print_fragen(k)
 
