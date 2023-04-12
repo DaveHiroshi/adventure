@@ -10,7 +10,7 @@ import os
 #################################################################
 size = os.get_terminal_size()
 screen_width=size.columns
-scree_height=size.lines
+screen_height=size.lines
 
 
 
