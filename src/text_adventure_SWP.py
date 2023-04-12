@@ -1,24 +1,59 @@
 import os
 
-os.system('cls')
-print('Willkommen,')
+# os.system('cls')
 
 
-trennlinie="------------------------------"
+
+#################################################################
+# Finde die Größe des Terminals, um die passende Länge für 
+# Trennlinien zu berechnen
+#################################################################
+size = os.get_terminal_size()
+scree_width=size.columns
+scree_height=size.lines
+
+
+
+#################################################################
+# globale Konstanten
+#################################################################
+
+trennlinie="="
+maximale_inventory_items = 5
+
+
 ################################################################
 # Liste des Inventars
 ################################################################
 inventar = []
 
+
+
+
+prolog = """Sie sind Teil einer mutigen Crew, die auf einer Mission im tiefen Raum unterwegs ist, 
+um gestrandete Wissenschaftler in einer fernen Galaxie zu retten. Sie haben keine Ahnung, 
+was Sie erwartet, wenn Sie den Gamma-Quadranten erreichen, aber Sie wissen, 
+dass Sie sich auf unbekanntem Terrain bewegen werden. 
+Ihr Raumschiff ist mit modernster Technologie ausgestattet und 
+Ihr Team wurde aufgrund seiner Fähigkeiten und Erfahrung sorgfältig ausgewählt.
+Ihre Mission ist von großer Bedeutung, denn die Wissenschaftler, 
+die Sie retten sollen, arbeiten an einem wichtigen Projekt, das das Schicksal der Galaxie beeinflussen könnte. Die Mission ist gefährlich und voller Herausforderungen, aber Sie sind bereit, sich allen Widrigkeiten zu stellen und die Wissenschaftler zu retten, um ihre wichtige Arbeit fortzusetzen.
+Als Sie sich auf den Weg machen, in die Tiefen des Weltraums, 
+können Sie nur hoffen, dass Sie und Ihr Team stark genug sind, 
+um die Herausforderungen zu bewältigen und diese Mission erfolgreich abzuschließen."""
+
+
+
+
 umgebung = [
                 [],
                 [],
-                ['[1] Asteroid abbauen', '[2] Schiffswrack'],
-                ['[1] Phaser', '[2] Phaser', '[3] Sonde', '[4] Reperatur Kit'],
+                ['Asteroid abbauen', 'Schiffswrack'],
+                ['Phaser', 'Phaser', 'Sonde', 'Reperatur Kit'],
                 [],
                 [],
                 [],
-                ['[1] Gold', '[2] Diamant'],
+                ['Gold', 'Diamant'],
                 [],
                 [],
                 [],
@@ -110,9 +145,105 @@ fragen = [
 # und printet den Inhalt des Kapitels.
 ################################################################
 def print_story(k):
-    print("=============================================")
+    print(trennlinie*scree_width)
+    print(f"\033[1mSzene {k+1}:\033[0m")
+    # print(f"\033[5mKapitel {k+1}:\033[0m")
     print(story[k])
-    print("=============================================")
+    print(trennlinie*scree_width)
+
+################################################################
+# Hilfsfunktion zu scannen der Umgebung
+# Die Funktion nimmt die Nummer des Kapitels als Parameter
+# und printet die Items aus der Liste "umgebung".
+################################################################
+def scan_umgebung(k):
+    print(trennlinie*scree_width)
+    if (len(umgebung[k])!= 0):
+
+        eingabe=choose_element_from_list(umgebung[k])
+
+        print(f"Du hast das Item {eingabe} gewählt.")
+        
+        ergebnis = add_to_inventory(k, int(eingabe)-1)
+
+        # ergebnis ist -1, wenn Inventar voll war
+        if(ergebnis==-1):
+            print("Dein Inventar ist voll, du kannst ein Objekt wegwerfen, um Platz für Neues zu schaffen.")
+            objekt_index=choose_element_from_list(inventar)
+            result=remove_from_inventory(objekt_index)
+            if(result != 0):
+                print("Fehler beim Löschen des {objekt_index}-ten Elements aus dem Inventar")
+
+
+    else:
+        print("Deine Umgebung ist leider völlig leer ... so ist es meistens in Vakuum des Weltalls.")
+    
+
+################################################################
+# Hilfsfunktion zur Verwaltung der Inventar
+# Die Funktion hat den Index eines Items aus der aktuellen Umgebung als
+# Parameter und fügt dieses der Inventarliste hinzu, sofern
+# die Länge der Liste maximale_inventory_items nicht überschreitet.
+# maximale_inventory_items is eine globale Grenze für die Anzahl der
+# Items in Inventar
+################################################################
+
+def add_to_inventory(k, index):
+    # wenn kein Platz im Inventar vorhanden ist, dann schreibe eine Fehlermeldung
+    if(len(inventar) >= maximale_inventory_items):
+        print(f"Inventar ist voll. Es sind nur {maximale_inventory_items} Objekte in Inventar erlaubt.")
+        return -1
+    else:
+        inventar.append(umgebung[k].pop(index))
+        return 0
+################################################################
+# Hilfsfunktion zur Enfernung von Objekten aus dem Inventar
+################################################################
+
+def remove_from_inventory(index):
+    # wenn Inventar leer ist, dann schreibe eine Fehlermeldung
+    index=int(index)
+
+    if(len(inventar) == 0 ):
+        print(f"Dein Inventar ist leer, deshalb kannst du nichts daraus entfernen.")
+        return -1
+    elif (index > len(inventar)):
+        print(f"Der gegebene Index {index} ist größer als die Länge des Inventars.")
+        return -2        
+    else:
+        inventar.pop(index)
+        return 0
+
+
+################################################################
+# Hilfsfunktion zur Auswahl eines Elementes aus einer Liste
+# Sie listet die Elemente der Liste auf und lässt den User ein Element auswählen
+# und gibt den Index des Objektes zurück
+# diese Funktion hat die Liste als Parameter
+################################################################
+def choose_element_from_list(liste):
+    for i in range(len(liste)):
+        print(f"[{i+1}] {liste[i]}")
+
+    print("Wähle ein Objekt aus!")
+    eingabe = ""
+    while(not eingabe.isdigit()):
+        
+        eingabe = input()
+
+        if(eingabe.isdigit()):
+            if(int(eingabe)>len(liste)):
+                print("Falsche Eingabe! Wähle eine Zahl zwischen [1] und [" + str(len(liste)) + "]:")
+                # lösche falsche Benutzereingabe
+                eingabe=""
+        # wenn die Eingabe keine Zahl war, dann ist es ein Fehler
+        else:
+            print("Falsche Eingabe! Wähle eine Zahl, die zwischen [1] und [" + str(len(liste)) +"]: liegt.")
+            # lösche falsche Benutzereingabe
+            eingabe=""
+
+    return eingabe
+
 
 ################################################################
 # Hilfsfunktion zur Darstellung von Fragen
@@ -121,8 +252,14 @@ def print_story(k):
 # parst die Antwort des Benutzers
 ################################################################
 def print_fragen(k):
+
+    ###########################################################
+    # das ist nur eine Fehlerbehandlung für das letzte Kapitel 
+    # wenn es keine Fragen mehr zu printen gibt.
+    ###########################################################
     if(k==len(fragen)):
         return
+
         
     print("Wähle die gewünschte Antwort aus!")
 
@@ -131,6 +268,8 @@ def print_fragen(k):
     
     print('[i] Inventar')
     print('[u] Umgebung Scannen')
+    print('[q] Spiel beenden')
+    print(trennlinie*scree_width)
 
     eingabe = ""
     while(eingabe not in ["1","2","i"]):
@@ -139,45 +278,48 @@ def print_fragen(k):
         if eingabe == ('i'):
             print('inventar:')
             print(inventar)
-            print(trennlinie)
+            print(trennlinie*scree_width)
             print_fragen(k)
         elif eingabe == ('u'):
             print('Umgebung:')
-            print_umgebung(k)
-            print(trennlinie)
+            scan_umgebung(k)
+            print(trennlinie*scree_width)
             print_fragen(k)
         elif eingabe in ["1","2"]:
             break
+        elif eingabe == ('q'):
+            quit()
         else:
             print("Falsche Auswahl: "+ eingabe)
-            print("Die korrekte Wahl kann nur [1], [2] oder [i] sein. Versuche es nochmals.")
-            print("-----------------------------------------------------------------------.")
+            print("Die korrekte Wahl kann nur [1], [2], [i], [u] oder [q] sein. Versuche es nochmals.")
+            print(trennlinie*scree_width)
 
     # die richtige Antwort wurde gelesen
     if (eingabe in ["1","2"]):
+        # Achtung, Listen beginnen mit 0 als Index, deshalb "eingabe-1"
         j=int(eingabe)-1
 
-        # hier wählen das nächste Kapitel aus
+        # hier wählen wir das nächste Kapitel aus
         next_step=int(fragen[k][j][1])
         kapitel(next_step)
-
-def print_umgebung(k):
-    print(umgebung[k])
 
 ################################################################
 # Printe Kapitel 0
 #
 ################################################################
 def kapitel(k):
-    # print(f">>>>>>> kapitel called with k={k}")
     print_story(k)
     print_fragen(k)
 
 ################################################################
 # Start des Programms
 ################################################################
+print(trennlinie*scree_width)
+print(prolog)
+
 
 kapitel(k=0)
+
 
 
 
