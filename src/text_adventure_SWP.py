@@ -1,12 +1,22 @@
+#################################################################
+# Author  : David Houman                                        #
+# email   : dhouman@student.tgm.ac.at                           #
+# git     : https://github.com/DaveHiroshi/adventure            # 
+# Version : 1.0                                                 #
+#################################################################
+
+
+#################################################################
+# Import Liste                                                  #
+#################################################################
 import os
-
-# os.system('cls')
-
 
 
 #################################################################
 # Finde die Größe des Terminals, um die passende Länge für 
 # Trennlinien zu berechnen
+# Quelle: 
+# https://stackoverflow.com/questions/65955906/valueerror-bad-file-descriptor-width-os-get-terminal-size-columns
 #################################################################
 size = os.get_terminal_size()
 screen_width=size.columns
@@ -19,16 +29,22 @@ screen_height=size.lines
 #################################################################
 
 trennlinie="="
-maximale_inventory_items = 5
+max_inventory_items = 5
 
 
 ################################################################
 # Liste des Inventars
+# Am anfang ist die Liste leer
+# Der Spieler kann in Szenen, die eine nicht leere Umgebung haben
+# Elemente der Umgebung wählen und der Invantarliste hinzufügen
 ################################################################
 inventar = []
 
 
 
+#################################################################
+# Vorwort der Geschichte als MEHRZEILIGE String Konstante
+#################################################################
 
 prolog = """Sie sind Teil einer mutigen Crew, die auf einer Mission im tiefen Raum unterwegs ist, 
 um gestrandete Wissenschaftler in einer fernen Galaxie zu retten. Sie haben keine Ahnung, 
@@ -42,29 +58,8 @@ Als Sie sich auf den Weg machen, in die Tiefen des Weltraums,
 können Sie nur hoffen, dass Sie und Ihr Team stark genug sind, 
 um die Herausforderungen zu bewältigen und diese Mission erfolgreich abzuschließen."""
 
-
-
-
-umgebung = [
-                [],
-                [],
-                ['Asteroid abbauen', 'Schiffswrack'],
-                ['Phaser', 'Phaser', 'Sonde', 'Reperatur Kit'],
-                [],
-                [],
-                [],
-                ['Gold', 'Diamant'],
-                [],
-                [],
-                [],
-                [],
-                []
-
-
-            ]
-
 ################################################################
-# Die story Liste beinhaltet als Elemente die Kapitel der Geschichte
+# Die story Liste beinhaltet als Elemente die Szenen der Geschichte
 ################################################################
 story = [ 
             "Du bist auf einer langen Mission, mit dem Ziel gestrandete Wissenschaftler aus dem gamma-Quadranten zu retten.\nDu bist der Captain auf einem Sternenschiff tausende Lichtjahre von der Erde entfernt. Es passiert seit mehreren Tagen nichts Spannendes mehr, du gehst schon in dein Zimmer und willst den Tag beenden, doch auf einmal ertönt durch die Sprechanlage des Schiffs ein Alarm. Du läufst auf die Brücke. Dein Offizier teilt dir mit, dass 2 feindliche Schiffe auf dem Radar aufgetaucht sind.",
@@ -79,15 +74,44 @@ story = [
             "Das Team hat sich für den rechten Weg entschieden. Je tiefer sie hinabsteigen, desto heißer wird es. Sie sind erschöpft und am Ende ihrer Kräfte. Plötzlich werden sie von unbekannten Wesen angegriffen.",
             "Nach dem längeren Schussaustausch, bemerkt einer der Soldaten, dass die Höhle einzustürzen droht.",
             "Nach langer Suche findet das Außenteam schließlich die verlorenen Wissenschaftler. Sie wissen nicht, dass sie auf der Erde als verschollen gelten und weigern sich ihre Arbeit zu beenden. Das Team muss sie zur Aufgabe ihrer Arbeit überreden. Nach einigen Diskussionen erklären sie sich bereit, ihre Instrumente einzupacken und begeben sich mit Hilfe des Außenteams zurück zur Oberfläche. Dort angekommen kontaktieren sie das Schiff und lassen sich hochbeamen. Die Mission ist ein voller Erfolg.  Zuhause auf der Erde wird die Besatzung des Schiffes für ihre Heldentaten gefeiert und erhalten die „Christopher Pike Heldenmedaille“. Du als Captain freust dich aber auf die nächsten Abenteuer mit deinem Schiff und deiner Crew.  Well done, Commander!",
-            "Game Over"
-            
+            "Deine Reise findet ein plötzliches Ende. Du bekommst einen Ehrenplatz in den Reihen der gefallenen Helden der Sternenflotte. Game Over!!"
         ]
 
 ################################################################
+# Die Umgebung Liste beinhaltet als Elemente die Listen der 
+# Items, die der Spieler in der jeweiligen Szene finden kann.
+# Die Umgebungsliste ist gleich lang wie die story Liste.
+# So kann man mit dem Index der story auch die dazugehörige 
+# Umgebung finden.
+################################################################
+
+umgebung = [
+                [],
+                [],
+                ['Asteroid abbauen', 'Schiffswrack'],
+                ['Phaser', 'Phaser', 'Sonde', 'Reperatur Kit'],
+                [],
+                [],
+                ['Replicator','Photonentorpedo'],
+                ['Gold', 'Diamant'],
+                [],
+                ['Kupfer','Eisen','Magnesium'],
+                ['Computerteile','Batterien'],
+                [],
+                []
+            ]
+
+
+
+################################################################
 # Die Fragen werden in einer 3-fach verschachtelten Liste gespeichert
-# die erste Ebene der Liste ist der Index des Kapitels selbst
-# die zweite Ebene ist die Liste der Antworten der Geschichte des Kapitels
-# die dritte Ebene ist eine Antwort gemeinsam mit dem Index des nächsten Kapitels
+# die erste Ebene der Liste ist der Index der Szene selbst, zu welchen die Fragen gehören 
+# die zweite Ebene ist die Liste der Wahlmöglichkeiten der Geschichte der jeweilgen Szene
+# die dritte Ebene ist eine Antwort gemeinsam mit dem Index der nächsten Szene
+# mit diesem Trick (Index der nächsten Szene erspart man sich viele verschchtelten IF Statements)
+# Beispiel: ["Du versuchst zu fliehen.","2"]
+# Wenn der Spieler in der Szene mit dem Index "0" die Antwort mit dem Index "1", also "Du versuchst zu fliehen."
+# wählt, dann ist mit der Szene "2" fortzusetzen.
 ################################################################
 fragen = [ 
             [
@@ -127,7 +151,7 @@ fragen = [
                 ["Stelle 3 bewaffnete Rettungsteams zusammen und beam sie auf die Oberfläche. ", "7"]
             ],
             [
-                [" Sie versuchen zu entkommen ", "11"], 
+                ["Sie versuchen zu entkommen ", "11"], 
                 ["Sie schießen zurück", "10"]
             ],
             [
@@ -135,14 +159,19 @@ fragen = [
                 ["Sie bleiben und feuern weiter auf ihre Gegner. ", "12"]
             ],
             [
-                ["Deine Reise findet ein plötzliches Ende. Du bekommst einen Ehrenplatz in den Reihen der gefallenen Helden der Sternenflotte.","12"],
-                ["dummy","12"]
+                # ["Deine Reise findet ein plötzliches Ende. Du bekommst einen Ehrenplatz in den Reihen der gefallenen Helden der Sternenflotte.","12"],
+                # ["dummy","12"]
             ]                        
         ]
 ################################################################
-# Hilfsfunktion zur Darstellung von Story Kapitel
+# Hilfsfunktion zur Darstellung von Story Szenen.
+# Name: print_story
+# Parameter: 
+# name: k  | Typ: Integer | Beschreibung: Index der Szene in der Liste "story" 
 # Die Funktion nimmt die Nummer des Kapitels als Parameter
 # und printet den Inhalt des Kapitels.
+# Quelle für print fett Buchstaben in der Konsole:
+# https://stackoverflow.com/questions/8924173/how-can-i-print-bold-text-in-python#:~:text=Try%3A,a%20bit%20like%20bolded%20white.
 ################################################################
 def print_story(k):
     print(trennlinie*screen_width)
@@ -153,59 +182,84 @@ def print_story(k):
         quit()
 
 ################################################################
-# Hilfsfunktion zu scannen der Umgebung
-# Die Funktion nimmt die Nummer des Kapitels als Parameter
-# und printet die Items aus der Liste "umgebung".
+# Hilfsfunktion zur Auswahl eines Elementes aus einer Liste
+# Name: choose_element_from_list
+# Parameter: 
+# name: liste  | Typ: liste | Beschreibung: die Liste, aus welcher der Index eines Elements gewählt werden soll
+# return values: 
+# index des Elements
+# leer, wenn der Spieler die Aktion abbricht
+# Sie listet die Elemente der Liste auf und lässt den User ein Element auswählen
+# und gibt die Wahl des Spielers zurück
 ################################################################
-def scan_umgebung(k):
-    print(trennlinie*screen_width)
-    if (umgebung[k]!=[]):
+def choose_element_from_list(liste):
 
-        eingabe=choose_element_from_list(umgebung[k])
+    for i in range(len(liste)): # print die Elemente der Liste aus
+        print(f"[{i+1}] {liste[i]}")
 
-        print(f"Du hast das Item {eingabe} gewählt.")
+    print(f"[a] Abbrechen") # mit "a" kann man die Aktion beenden
         
-        ergebnis = add_to_inventory(k, int(eingabe)-1)
+    print("Wähle ein Objekt aus!")
 
-        # ergebnis ist -1, wenn Inventar voll war
-        if(ergebnis==-1):
-            print("Dein Inventar ist voll, du kannst ein Objekt wegwerfen, um Platz für Neues zu schaffen.")
-            objekt_index=choose_element_from_list(inventar)
-            result=remove_from_inventory(objekt_index)
-            if(result != 0):
-                print("Fehler beim Löschen des {objekt_index}-ten Elements aus dem Inventar")
+    eingabe = ""
+    while(not eingabe.isdigit()): # solange die Eingabe keine Zahl ist, loop
+        
+        eingabe = input()
 
+        if(eingabe.isdigit()): # wenn die Eingabe eine Zahl ist
+            if(int(eingabe)>len(liste)): # Aber die Eingabe größer als die Länge der Liste ist, ist das ein Fehler
+                print("Falsche Eingabe! Wähle eine Zahl zwischen [1] und [" + str(len(liste)) + "] oder [a] um die Aktion abzubrechen:")
+                eingabe="" # lösche falsche Benutzereingabe
+        elif (eingabe == 'a'): # Spieler bricht die Aktion ab
+            return
+        else: # wenn die Eingabe keine Zahl war, dann ist es ein Fehler
+            print("Falsche Eingabe! Wähle eine Zahl, die zwischen [1] und [" + str(len(liste)) +"] liegt oder [a] um die Aktion abzubrechen:")
+            eingabe=""  # lösche falsche Benutzereingabe
 
-    else:
-        print("Deine Umgebung ist leider völlig leer ... so ist es meistens in Vakuum des Weltalls.")
-    
+    return eingabe
+
 
 ################################################################
-# Hilfsfunktion zur Verwaltung der Inventar
-# Die Funktion hat den Index eines Items aus der aktuellen Umgebung als
-# Parameter und fügt dieses der Inventarliste hinzu, sofern
-# die Länge der Liste maximale_inventory_items nicht überschreitet.
-# maximale_inventory_items is eine globale Grenze für die Anzahl der
+# Hilfsfunktion zur Verwaltung des Inventars
+# Name: add_to_inventory
+# Parameter: 
+# name: k      | Typ: Integer | Beschreibung: der Index der Szene
+# name: index  | Typ: Integer | Beschreibung: der Index des Item aus der Umgebung der Szene
+# return values: 
+# 0  Item erfolgreich hinzugefügt
+# -1 Fehler: inventory ist voll
+# Die Funktion hat den Index der Szene und den eines Items aus der aktuellen Umgebung der Szene als
+# Parameter und fügt dieses Element der Inventarliste hinzu, wenn
+# die Länge der Liste max_inventory_items nicht überschreitet.
+# Es enfernt gleichzeitig das Element aus der Liste Umgebung und fügt es der Liste inventar hinzu.
+# max_inventory_items is eine globale Grenze für die Anzahl der
 # Items in Inventar
 ################################################################
 
 def add_to_inventory(k, index):
     # wenn kein Platz im Inventar vorhanden ist, dann schreibe eine Fehlermeldung
-    if(len(inventar) >= maximale_inventory_items):
-        print(f"Inventar ist voll. Es sind nur {maximale_inventory_items} Objekte in Inventar erlaubt.")
+    if(len(inventar) >= max_inventory_items):
+        print(f"Dein Inventar ist voll. Es sind nur {max_inventory_items} Objekte im Inventar erlaubt.")
         return -1
     else:
         inventar.append(umgebung[k].pop(index))
         return 0
+
 ################################################################
 # Hilfsfunktion zur Enfernung von Objekten aus dem Inventar
+# Name: remove_from_inventory
+# Parameter: 
+# name: index      | Typ: Integer | Beschreibung: der Index des Items aus dem Inventar
+# return values: 
+# 0  Item erfolgreich hinzugefügt
+# -1 Fehler: inventory ist leer
+# -2 Fehler: der gegebene Index ist größer als Länge der Inventar Liste
 ################################################################
 
 def remove_from_inventory(index):
-    # wenn Inventar leer ist, dann schreibe eine Fehlermeldung
-    index=int(index)
+    index=int(index)-1
 
-    if(len(inventar) == 0 ):
+    if(len(inventar) == 0 ):     # wenn Inventar leer ist, dann schreibe eine Fehlermeldung
         print(f"Dein Inventar ist leer, deshalb kannst du nichts daraus entfernen.")
         return -1
     elif (index > len(inventar)):
@@ -216,38 +270,53 @@ def remove_from_inventory(index):
         return 0 # alles ok
 
 
-################################################################
-# Hilfsfunktion zur Auswahl eines Elementes aus einer Liste
-# Sie listet die Elemente der Liste auf und lässt den User ein Element auswählen
-# und gibt den Index des Objektes zurück
-# diese Funktion hat die Liste als Parameter
-################################################################
-def choose_element_from_list(liste):
-    for i in range(len(liste)):
-        print(f"[{i+1}] {liste[i]}")
 
-    print("Wähle ein Objekt aus!")
-    eingabe = ""
-    while(not eingabe.isdigit()):
-        
-        eingabe = input()
+################################################################
+# Hilfsfunktion zu scannen der Umgebung
+# Name: scan_umgebung
+# Parameter: 
+# name: k  | Typ: Integer | Beschreibung: Index der Szene in der Liste "story" 
+# Die Funktion nimmt die Nummer der Szene als Parameter
+# und printet die Items aus der Liste "umgebung".
+################################################################
+def scan_umgebung(k):
+    print(trennlinie*screen_width)
 
-        if(eingabe.isdigit()):
-            if(int(eingabe)>len(liste)):
-                print("Falsche Eingabe! Wähle eine Zahl zwischen [1] und [" + str(len(liste)) + "]:")
-                # lösche falsche Benutzereingabe
-                eingabe=""
-        # wenn die Eingabe keine Zahl war, dann ist es ein Fehler
+
+    if (umgebung[k]!=[]): # printe nur, wenn die Liste der Umgebung der Szene nicht leer ist
+
+        eingabe=choose_element_from_list(umgebung[k])
+
+        if(eingabe is None):
+            print(f"Du hast die Aktion abgebrochen.")    
+            return
         else:
-            print("Falsche Eingabe! Wähle eine Zahl, die zwischen [1] und [" + str(len(liste)) +"]: liegt.")
-            # lösche falsche Benutzereingabe
-            eingabe=""
+            print(f"Du hast das Item {eingabe} gewählt.")
+            
+        ergebnis = add_to_inventory(k, int(eingabe)-1) # eingabe - 1 ist notwendig, weil der Spieler ab 1 zu zählen beginnt
 
-    return eingabe
+        
+        if(ergebnis==-1): # ergebnis ist -1, wenn Inventar voll war
+            print("Dein Inventar ist voll, du kannst ein Objekt wegwerfen, um Platz für Neues zu schaffen.")
+            print("Wähle das Objekt aus, das gelöscht werden soll.")
+            objekt_index = choose_element_from_list(inventar)
+            result       = remove_from_inventory(objekt_index)
+            if(result != 0):
+                print("Fehler beim Löschen des {objekt_index}-ten Elements aus dem Inventar")
+
+    else: # wenn die Umgebung der Szene leer ist
+        print("Deine Umgebung ist leider völlig leer ... so ist es meistens in Vakuum des Weltalls.")
+    
+
+
+
 
 
 ################################################################
 # Hilfsfunktion zur Darstellung von Fragen
+# Name: print_fragen
+# Parameter: 
+# name: k  | Typ: Integer | Beschreibung: Index der Szene in der Liste "story" 
 # Die Funktion nimmt die Nummer des Kapitels als Parameter
 # und printet die Liste der Fragen des Kapitels und 
 # parst die Antwort des Benutzers
@@ -262,23 +331,23 @@ def print_fragen(k):
         return
 
         
-    print("Wähle die gewünschte Antwort aus!")
+    print("Wähle die gewünschte Antwort/Aktion aus!")
 
     for j in range(len(fragen[k])):
         print("[" + str(j+1) + "] "+ fragen[k][j][0])
     
+    # standard Aktionen [i] [u] [q]
     print('[i] Inventar')
     print('[u] Umgebung Scannen')
     print('[q] Spiel beenden')
     print(trennlinie*screen_width)
 
     eingabe = ""
-    while(eingabe not in ["1","2","i","u","q"]):
+    while(eingabe not in ["1","2","i","u","q"]): # das ist die Liste der erlaubten Antworten
         eingabe = input()
 
         if eingabe == ('i'):
-            print('inventar:')
-            
+            print('inventar:')            
             if(inventar==[]):
                 print("Dein Inventar is leer.")
             else:
@@ -301,16 +370,28 @@ def print_fragen(k):
 
     # die richtige Antwort wurde gelesen
     if (eingabe in ["1","2"]):
-        # Achtung, Listen beginnen mit 0 als Index, deshalb "eingabe-1"
+        ####################################################################
+        # ACHTUNG: kritische Stelle                                        #
+        # Der Anfang der Rekursion ist hier.                               #
+        # Hier wählen wir das nächste Kapitel aus.                         #
+        # Die Funktion "kapitel" wird hier nochmals mit dem Index der      #
+        # nächsten Szene aufgerufen, und damit geht man zur nächsten Szene #
+        # k=Kapitel Index                                                  #
+        # j=die vom Spieler gewählte Antwort[1,2]                          #
+        # [1] Index der Ziel Szene, wo man hingehen soll                   #
+        ####################################################################
         j=int(eingabe)-1
-
-        # hier wählen wir das nächste Kapitel aus
-        next_step=int(fragen[k][j][1])
-        kapitel(next_step)
+        next_scene=int(fragen[k][j][1]) 
+        kapitel(next_scene)
 
 ################################################################
-# Printe Kapitel 0
-#
+# 
+# Hilfsfunktion zum Start eines Kapitels
+# Name: kapitel
+# Parameter: 
+# name: k  | Typ: Integer | Beschreibung: Index der Szene in der Liste "story"  
+# Die Funktion ruft zwei weitere Funktionen auf
+# print_story und print_fragen der Szene k
 ################################################################
 def kapitel(k):
     print_story(k)
