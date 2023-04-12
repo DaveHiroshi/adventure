@@ -9,7 +9,7 @@ import os
 # Trennlinien zu berechnen
 #################################################################
 size = os.get_terminal_size()
-scree_width=size.columns
+screen_width=size.columns
 scree_height=size.lines
 
 
@@ -145,11 +145,12 @@ fragen = [
 # und printet den Inhalt des Kapitels.
 ################################################################
 def print_story(k):
-    print(trennlinie*scree_width)
+    print(trennlinie*screen_width)
     print(f"\033[1mSzene {k+1}:\033[0m")
-    # print(f"\033[5mKapitel {k+1}:\033[0m")
     print(story[k])
-    print(trennlinie*scree_width)
+    print(trennlinie*screen_width)
+    if(k==12):
+        quit()
 
 ################################################################
 # Hilfsfunktion zu scannen der Umgebung
@@ -157,8 +158,8 @@ def print_story(k):
 # und printet die Items aus der Liste "umgebung".
 ################################################################
 def scan_umgebung(k):
-    print(trennlinie*scree_width)
-    if (len(umgebung[k])!= 0):
+    print(trennlinie*screen_width)
+    if (umgebung[k]!=[]):
 
         eingabe=choose_element_from_list(umgebung[k])
 
@@ -209,10 +210,10 @@ def remove_from_inventory(index):
         return -1
     elif (index > len(inventar)):
         print(f"Der gegebene Index {index} ist größer als die Länge des Inventars.")
-        return -2        
+        return -2   
     else:
         inventar.pop(index)
-        return 0
+        return 0 # alles ok
 
 
 ################################################################
@@ -269,21 +270,25 @@ def print_fragen(k):
     print('[i] Inventar')
     print('[u] Umgebung Scannen')
     print('[q] Spiel beenden')
-    print(trennlinie*scree_width)
+    print(trennlinie*screen_width)
 
     eingabe = ""
-    while(eingabe not in ["1","2","i"]):
+    while(eingabe not in ["1","2","i","u","q"]):
         eingabe = input()
 
         if eingabe == ('i'):
             print('inventar:')
-            print(inventar)
-            print(trennlinie*scree_width)
+            
+            if(inventar==[]):
+                print("Dein Inventar is leer.")
+            else:
+                print(inventar)
+            print(trennlinie*screen_width)
             print_fragen(k)
         elif eingabe == ('u'):
             print('Umgebung:')
             scan_umgebung(k)
-            print(trennlinie*scree_width)
+            print(trennlinie*screen_width)
             print_fragen(k)
         elif eingabe in ["1","2"]:
             break
@@ -292,7 +297,7 @@ def print_fragen(k):
         else:
             print("Falsche Auswahl: "+ eingabe)
             print("Die korrekte Wahl kann nur [1], [2], [i], [u] oder [q] sein. Versuche es nochmals.")
-            print(trennlinie*scree_width)
+            print(trennlinie*screen_width)
 
     # die richtige Antwort wurde gelesen
     if (eingabe in ["1","2"]):
@@ -314,7 +319,7 @@ def kapitel(k):
 ################################################################
 # Start des Programms
 ################################################################
-print(trennlinie*scree_width)
+print(trennlinie*screen_width)
 print(prolog)
 
 
